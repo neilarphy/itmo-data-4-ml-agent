@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+data/raw/
+data/cleaned/
+data/labeled/
+data/active/
+data/eda/
+data/detective/
+*.parquet
+*.csv
+!review_queue_template.csv
+models/
+.DS_Store
