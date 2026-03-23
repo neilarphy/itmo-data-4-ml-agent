@@ -1,0 +1,3 @@
+text,label,source,confidence,corrected_label
+"пример текста 1","positive","hf:imdb",0.62,"positive"
+"пример текста 2","negative","scrape:example.com",0.58,"neutral"
