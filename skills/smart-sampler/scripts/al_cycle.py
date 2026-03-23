@@ -15,6 +15,7 @@ Active Learning цикл. Поддерживает text, image, audio.
 import argparse
 import json
 import os
+import pickle
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -136,7 +137,8 @@ def random_query(n_pool: int, n: int) -> list[int]:
 
 def run_cycle(seed_path: str, pool_path: str, test_path: str,
               output_path: str, strategy: str,
-              n_iterations: int, batch_size: int, modality_hint: str = None):
+              n_iterations: int, batch_size: int, modality_hint: str = None,
+              save_model: str = None):
 
     np.random.seed(42)
     os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
@@ -155,9 +157,10 @@ def run_cycle(seed_path: str, pool_path: str, test_path: str,
     labeled = seed.copy()
     history = []
 
+    final_vectorizer = None
     for iteration in range(n_iterations + 1):
         # Признаки (переобучать на каждой итерации)
-        X_train, X_test, _ = get_features(labeled, test, modality)
+        X_train, X_test, final_vectorizer = get_features(labeled, test, modality)
         y_train = labeled["label"].tolist()
         y_test = test["label"].tolist()
 
@@ -214,6 +217,22 @@ def run_cycle(seed_path: str, pool_path: str, test_path: str,
     print(f"\n  Финал: accuracy={final['accuracy']:.3f} | f1={final['f1']:.3f}")
     print(f"  Использовано примеров: {final['n_labeled']}")
     print(f"  Сохранено: {output_path}")
+
+    if save_model:
+        os.makedirs(os.path.dirname(save_model) if os.path.dirname(save_model) else ".", exist_ok=True)
+        model_bundle = {
+            "vectorizer": final_vectorizer,
+            "classifier": clf,
+            "modality": modality,
+            "classes": clf.classes_.tolist(),
+            "metrics": {"accuracy": final["accuracy"], "f1": final["f1"]},
+            "n_labeled": final["n_labeled"],
+            "strategy": strategy,
+        }
+        with open(save_model, "wb") as f:
+            pickle.dump(model_bundle, f)
+        print(f"  Модель сохранена: {save_model}")
+
     return history
 
 
@@ -227,7 +246,9 @@ if __name__ == "__main__":
     parser.add_argument("--n-iterations", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=20)
     parser.add_argument("--modality", default=None, choices=["text", "image", "audio"])
+    parser.add_argument("--save-model", default=None, help="Путь для сохранения модели (.pkl)")
     args = parser.parse_args()
 
     run_cycle(args.seed, args.pool, args.test, args.output,
-              args.strategy, args.n_iterations, args.batch_size, args.modality)
+              args.strategy, args.n_iterations, args.batch_size, args.modality,
+              args.save_model)

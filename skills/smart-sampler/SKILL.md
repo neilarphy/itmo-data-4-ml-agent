@@ -98,7 +98,7 @@ print(f'Seed classes: {seed[\"label\"].value_counts().to_dict()}')
 ### Шаг 3: AL-цикл по всем трём стратегиям
 
 ```bash
-# Entropy
+# Entropy (+ сохранить финальную модель)
 .venv/bin/python ~/.claude/skills/smart-sampler/scripts/al_cycle.py \
     --seed data/active/seed.parquet \
     --pool data/active/pool.parquet \
@@ -106,7 +106,8 @@ print(f'Seed classes: {seed[\"label\"].value_counts().to_dict()}')
     --output data/active/history_entropy.json \
     --strategy entropy \
     --n-iterations 5 \
-    --batch-size 20
+    --batch-size 20 \
+    --save-model models/final_model.pkl
 
 # Margin
 .venv/bin/python ~/.claude/skills/smart-sampler/scripts/al_cycle.py \

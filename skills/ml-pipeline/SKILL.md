@@ -264,7 +264,7 @@ print(result['label'].value_counts().to_string())
 
 После подтверждения:
 ```bash
-mkdir -p data/active
+mkdir -p data/active models
 
 .venv/bin/python -c "
 import pandas as pd
@@ -288,7 +288,8 @@ for strategy in entropy margin random; do
     --output data/active/history_${strategy}.json \
     --strategy $strategy \
     --n-iterations <ITERATIONS> \
-    --batch-size <BATCH>
+    --batch-size <BATCH> \
+    $([ "$strategy" = "entropy" ] && echo "--save-model models/final_model.pkl")
 done
 
 .venv/bin/python ~/.claude/skills/smart-sampler/scripts/visualize.py \
@@ -330,6 +331,7 @@ done
 - Лучшая стратегия: <entropy/margin>
 - Экономия vs random: <N> примеров (<P>%)
 - data/active/learning_curve.png | data/active/REPORT.md
+- models/final_model.pkl (accuracy=<X>, f1=<Y>)
 
 ### Готово для ML:
 - Размеченный датасет: data/labeled/labeled_final.parquet
