@@ -19,8 +19,11 @@ def search_duckduckgo(query: str, max_results: int = 5) -> list[dict]:
     try:
         from duckduckgo_search import DDGS
     except ImportError:
-        print("ERROR: pip install duckduckgo-search")
-        sys.exit(1)
+        try:
+            from ddgs import DDGS
+        except ImportError:
+            print("ERROR: pip install ddgs")
+            sys.exit(1)
 
     results = []
     try:
