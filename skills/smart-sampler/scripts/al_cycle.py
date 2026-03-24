@@ -178,8 +178,30 @@ def extract_features_audio(train_paths, test_paths=None):
 
 # ── Мультимодальный диспетчер ─────────────────────────────────────────
 
+def extract_features_tabular(train_texts, test_texts=None):
+    """JSON строки → numpy array числовых фичей."""
+    import json as _json
+
+    def parse(s):
+        try:
+            d = _json.loads(s)
+            return np.array(list(d.values()), dtype=float)
+        except Exception:
+            return np.zeros(16)
+
+    X_train = np.array([parse(s) for s in train_texts])
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    if test_texts is not None:
+        X_test = scaler.transform(np.array([parse(s) for s in test_texts]))
+        return X_train, X_test, ("tabular_scaler", scaler)
+    return X_train, ("tabular_scaler", scaler)
+
+
+# ── Мультимодальный диспетчер ─────────────────────────────────────────
+
 def detect_modality(df: pd.DataFrame, hint: str = None) -> str:
-    if hint and hint in ("text", "image", "audio"):
+    if hint and hint in ("text", "image", "audio", "tabular"):
         return hint
     if "modality" in df.columns:
         counts = df["modality"].value_counts()
@@ -201,6 +223,8 @@ def get_features(train_df: pd.DataFrame, test_df: pd.DataFrame,
         return extract_features_image(train_df[col].tolist(), test_df[col].tolist())
     elif modality == "audio":
         return extract_features_audio(train_df[col].tolist(), test_df[col].tolist())
+    elif modality == "tabular":
+        return extract_features_tabular(train_df[col].tolist(), test_df[col].tolist())
     else:
         print(f"  WARNING: неизвестная модальность '{modality}', используем TF-IDF")
         return extract_features_text_tfidf(train_df[col].astype(str).tolist(),
@@ -226,6 +250,19 @@ def get_features_pool(pool_df: pd.DataFrame, modality: str,
             return _img_features_histogram(path)
 
         X = np.array([get_feat(p) for p in pool_df[col].tolist()])
+        return scaler.transform(X)
+    elif modality == "tabular":
+        import json as _json
+        _, scaler = vectorizer
+
+        def parse(s):
+            try:
+                d = _json.loads(s)
+                return np.array(list(d.values()), dtype=float)
+            except Exception:
+                return np.zeros(16)
+
+        X = np.array([parse(s) for s in pool_df[col].tolist()])
         return scaler.transform(X)
     elif modality == "audio":
         try:
@@ -399,7 +436,7 @@ if __name__ == "__main__":
     parser.add_argument("--strategy", required=True, choices=["entropy", "margin", "random"])
     parser.add_argument("--n-iterations", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=20)
-    parser.add_argument("--modality", default=None, choices=["text", "image", "audio"])
+    parser.add_argument("--modality", default=None, choices=["text", "image", "audio", "tabular"])
     parser.add_argument("--features", default="tfidf", choices=["tfidf", "sentence"],
                         help="Метод извлечения фичей для текста")
     parser.add_argument("--model", default="logreg", choices=["logreg", "svm", "rf"],
