@@ -97,7 +97,21 @@ print(f'Seed classes: {seed[\"label\"].value_counts().to_dict()}')
 
 ### Шаг 3: AL-цикл по всем трём стратегиям
 
+Выбор опций перед запуском:
+
+| Флаг | Значение | Когда использовать |
+|------|----------|--------------------|
+| `--model logreg` | LogisticRegression (default) | всегда, лучшая калибровка |
+| `--model svm` | SVM с RBF | небольшие датасеты, сложные границы |
+| `--model rf` | RandomForest | если нужна feature importance |
+| `--features tfidf` | TF-IDF (default для text) | быстро, хорошо для коротких текстов |
+| `--features sentence` | sentence-transformers | семантическое сходство, длинные тексты |
+| `--modality image` | ResNet18 embeddings (512-dim) | если torch установлен, иначе гистограммы |
+| `--modality audio` | MFCC+delta+spectral (~88-dim) | аудиофайлы |
+
 ```bash
+mkdir -p models
+
 # Entropy (+ сохранить финальную модель)
 .venv/bin/python ~/.claude/skills/smart-sampler/scripts/al_cycle.py \
     --seed data/active/seed.parquet \
@@ -129,6 +143,10 @@ print(f'Seed classes: {seed[\"label\"].value_counts().to_dict()}')
     --n-iterations 5 \
     --batch-size 20
 ```
+
+**Для image датасетов** добавить `--modality image`. Если torchvision установлен — автоматически используются ResNet18 embeddings (512-dim), иначе fallback на цветовые гистограммы.
+
+**Для sentence embeddings** добавить `--features sentence`. Нужен `pip install sentence-transformers` (~500MB первый раз).
 
 ---
 

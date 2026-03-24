@@ -24,6 +24,16 @@ API_BASE_URL=https://bothub.chat/api/v2/openai/v1
 API_MODEL=gpt-4o-mini
 ```
 
+### Поддержка модальностей
+
+| Модальность | Метод | Требования |
+|-------------|-------|------------|
+| `text` | Батч из 10 текстов в один LLM запрос | — |
+| `image` | GPT-4o-mini vision API, по одному | API_MODEL=gpt-4o-mini (поддерживает vision) |
+| `audio` | faster-whisper tiny → транскрипция → LLM | `pip install faster-whisper` (~75MB) |
+
+Модальность определяется автоматически из колонки `modality` датасета.
+
 ---
 
 ## Workflow

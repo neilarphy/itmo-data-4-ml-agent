@@ -304,6 +304,26 @@ done
 
 ---
 
+### Этап 5: Data Card + Inference
+
+```bash
+# Сгенерировать Data Card (читает все артефакты автоматически)
+mkdir -p ~/.claude/skills/ml-pipeline/scripts 2>/dev/null || true
+.venv/bin/python ~/.claude/skills/ml-pipeline/scripts/generate_datacard.py \
+    --task "<TASK>" \
+    --classes "<CLASSES>" \
+    --output DATA_CARD.md
+
+# Проверить inference на примере
+.venv/bin/python ~/.claude/skills/smart-sampler/scripts/predict.py \
+    --model models/final_model.pkl \
+    --text "<тестовый пример>"
+```
+
+Сообщить: `✓ Этап 5 завершён → DATA_CARD.md | models/final_model.pkl`
+
+---
+
 ### Финальная сводка
 
 После завершения всех этапов показать:
@@ -331,12 +351,17 @@ done
 - Лучшая стратегия: <entropy/margin>
 - Экономия vs random: <N> примеров (<P>%)
 - data/active/learning_curve.png | data/active/REPORT.md
-- models/final_model.pkl (accuracy=<X>, f1=<Y>)
+
+### Этап 5: Model + Data Card
+- Accuracy: <X> | F1: <Y>
+- models/final_model.pkl
+- DATA_CARD.md
 
 ### Готово для ML:
 - Размеченный датасет: data/labeled/labeled_final.parquet
 - Спецификация: data/labeled/spec.md
 - LabelStudio: data/labeled/labelstudio_import.json
+- Inference: python predict.py --model models/final_model.pkl --input <file>
 ```
 
 ---
