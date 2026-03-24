@@ -45,9 +45,9 @@ mkdir -p data/raw data/eda
 
 ---
 
-### Шаг 1: Поиск источников — три скрипта + парсинг
+### Шаг 1: Поиск источников — четыре скрипта + парсинг
 
-Запустить ВСЕ три поиска, затем собрать итоговую таблицу.
+Запустить ВСЕ четыре поиска, затем собрать итоговую таблицу.
 
 #### 1.1 HuggingFace Hub
 
@@ -63,17 +63,35 @@ mkdir -p data/raw data/eda
 .venv/bin/python ~/.claude/skills/data-collector/scripts/search_datasets.py --source kaggle --topic "<TOPIC>" --limit 6
 ```
 
-#### 1.3 Веб-поиск (Kaggle, PapersWithCode, GitHub, UCI, OpenML и др.)
+#### 1.3 Roboflow Universe (CV датасеты: detection, segmentation, classification)
 
 ```bash
 .venv/bin/pip install duckduckgo-search -q
+.venv/bin/python ~/.claude/skills/data-collector/scripts/search_roboflow.py --topic "<TOPIC>" --task <any|object-detection|classification|segmentation> --limit 8
+```
+
+Находит датасеты на universe.roboflow.com через DuckDuckGo. Особенно полезно для задач с изображениями.
+Для скачивания нужен бесплатный API ключ: `https://app.roboflow.com/` → Settings → API Key → добавить в `.env` как `ROBOFLOW_API_KEY`.
+
+Скачивание после выбора:
+```bash
+.venv/bin/pip install roboflow -q
+.venv/bin/python ~/.claude/skills/data-collector/scripts/search_roboflow.py \
+    --download --workspace "<WORKSPACE>" --project "<PROJECT>" --version 1 --format folder
+```
+
+Скрипт автоматически конвертирует скачанные изображения в unified parquet схему → `data/raw/roboflow_<project>.parquet`.
+
+#### 1.4 Веб-поиск (Kaggle, PapersWithCode, GitHub, UCI, OpenML и др.)
+
+```bash
 .venv/bin/python ~/.claude/skills/data-collector/scripts/search_web.py --topic "<TOPIC>" --modality <text|image|audio|any> --limit 8
 ```
 
 Скрипт ищет через DuckDuckGo по шаблонам: `site:kaggle.com`, `site:paperswithcode.com`, `site:github.com`, общий поиск датасетов.
 Для перспективных ссылок использовать WebFetch чтобы проверить что данные реально доступны.
 
-#### 1.4 Источники для парсинга / API
+#### 1.5 Источники для парсинга / API
 
 Самостоятельно поискать сайты с данными по теме:
 - Отзывы: Yelp, IMDb, App Store reviews
