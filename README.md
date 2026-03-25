@@ -121,7 +121,6 @@ DATA_CARD.md      # описание датасета
 | `modality` | str | `text` / `image` / `audio` / `tabular` |
 | `source` | str | `hf:<name>`, `kaggle:<name>`, `scrape:<url>`, `roboflow:<name>` |
 | `collected_at` | str | ISO timestamp |
-| `cow_id` | str | Опциональный ID объекта (для трекинга) |
 
 ## Требования
 
