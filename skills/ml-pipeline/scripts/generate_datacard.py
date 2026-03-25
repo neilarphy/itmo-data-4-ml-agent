@@ -167,8 +167,21 @@ def generate(task: str, classes: list, output_path: str):
     ]
 
     if problems:
-        for p_type, p_info in problems.items() if isinstance(problems, dict) else []:
-            lines.append(f"- {p_type}: {p_info}")
+        issues = problems.get("issues", {})
+        lines += [f"| Проблема | Значение | Серьёзность |",
+                  f"|----------|---------|-------------|"]
+        miss = sum(issues.get("missing", {}).values()) if issues.get("missing") else 0
+        lines.append(f"| Пропуски | {miss} | {'Нет' if miss == 0 else 'Есть'} |")
+        dups = issues.get("duplicates", {})
+        lines.append(f"| Дубликаты | {dups.get('count', 0)} ({dups.get('pct', 0):.1f}%) | {'Нет' if dups.get('count', 0) == 0 else 'Есть'} |")
+        out = issues.get("outliers", {})
+        lines.append(f"| Выбросы (IQR) | {out.get('iqr_count', 0)} ({out.get('iqr_pct', 0):.1f}%) | {'Нет' if out.get('iqr_count', 0) == 0 else 'Низкая'} |")
+        lines.append(f"| Выбросы (z>3) | {out.get('z3_count', 0)} ({out.get('z3_pct', 0):.1f}%) | {'Нет' if out.get('z3_count', 0) == 0 else 'Низкая'} |")
+        imb = issues.get("class_imbalance", {})
+        ratio = imb.get("imbalance_ratio", 1)
+        sev = "Высокая" if ratio > 10 else ("Средняя" if ratio > 3 else "Нет")
+        lines.append(f"| Дисбаланс классов | {ratio:.0f}x | {sev} |")
+        lines.append("")
     if raw.get("rows") and cleaned.get("rows"):
         removed = raw["rows"] - cleaned["rows"]
         pct = round(removed / raw["rows"] * 100, 1)
@@ -177,9 +190,14 @@ def generate(task: str, classes: list, output_path: str):
     lines += [
         f"",
         f"### auto-tagger",
-        f"- Разметил {labeled.get('rows', '?')} примеров через LLM",
-        f"- Средняя уверенность: {labeled.get('avg_confidence', '—')}",
-        f"- На ручную проверку отправлено: {review_count} примеров",
+        *(
+            [f"- Разметил {labeled.get('rows', '?')} примеров через LLM",
+             f"- Средняя уверенность: {labeled.get('avg_confidence')}",
+             f"- На ручную проверку отправлено: {review_count} примеров"]
+            if labeled.get("avg_confidence") is not None
+            else [f"- Пропущен — данные поступили с готовыми метками",
+                  f"- Проверка вручную: {review_count} примеров (confidence-флагинг через модель)"]
+        ),
         f"",
         f"### smart-sampler (Active Learning)",
         f"- Стратегия: {model.get('strategy', '—')}",
