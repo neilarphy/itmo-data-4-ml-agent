@@ -25,13 +25,22 @@ def export_labelstudio(input_path: str, output_path: str, task: str, classes: li
         label = str(row.get("label", "unlabeled"))
         confidence = float(row.get("confidence", 1.0))
         source = str(row.get("source", ""))
+        modality = str(row.get("modality", "text"))
+
+        # Формируем data и to_name в зависимости от модальности
+        if modality == "image":
+            task_data = {"image": text, "source": source}
+            to_name = "image"
+        elif modality == "audio":
+            task_data = {"audio": text, "source": source}
+            to_name = "audio"
+        else:  # text и tabular — оба отображаются как текст
+            task_data = {"text": text, "source": source}
+            to_name = "text"
 
         task_obj = {
             "id": str(uuid.uuid4()),
-            "data": {
-                "text": text,
-                "source": source,
-            },
+            "data": task_data,
         }
 
         # Добавить pre-annotation если есть метка (не unlabeled)
@@ -46,7 +55,7 @@ def export_labelstudio(input_path: str, output_path: str, task: str, classes: li
                             "type": "choices",
                             "value": {"choices": [label]},
                             "from_name": "label",
-                            "to_name": "text",
+                            "to_name": to_name,
                         }
                     ],
                 }
