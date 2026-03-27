@@ -10,6 +10,10 @@ import streamlit as st
 
 st.set_page_config(page_title="ML Pipeline Dashboard", page_icon="🔬", layout="wide")
 
+# ── Рабочая директория = папка dashboard.py ───────────────────────────────────
+_BASE = os.path.dirname(os.path.abspath(__file__))
+os.chdir(_BASE)
+
 # ── Пути ──────────────────────────────────────────────────────────────────────
 PATHS = {
     "raw":      "data/raw/combined.parquet",
@@ -358,11 +362,11 @@ elif page == "📈 Метрики":
     with tab3:
         import matplotlib.pyplot as plt
 
-        histories = {n: load_json(p) for n, p in [
+        histories = {n: v for n, p in [
             ("entropy", PATHS["al_entropy"]),
             ("margin",  PATHS["al_margin"]),
             ("random",  PATHS["al_random"]),
-        ] if exists(p)}
+        ] if exists(p) for v in [load_json(p)] if v is not None}
 
         if not histories:
             st.info("Запусти smart-sampler → al_cycle.py")
@@ -433,11 +437,11 @@ elif page == "💡 Выводы":
     problems   = load_json(PATHS["problems"])
     review_df  = load_review()
 
-    al_histories = {n: load_json(p) for n, p in [
+    al_histories = {n: v for n, p in [
         ("entropy", PATHS["al_entropy"]),
         ("margin",  PATHS["al_margin"]),
         ("random",  PATHS["al_random"]),
-    ] if exists(p)}
+    ] if exists(p) for v in [load_json(p)] if v is not None}
 
     # 1. Описание датасета
     st.subheader("1. Датасет")
