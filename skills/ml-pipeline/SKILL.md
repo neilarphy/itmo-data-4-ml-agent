@@ -192,6 +192,13 @@ mkdir -p data/labeled
     --confidence-threshold <CONFIDENCE>
 ```
 
+Запустить дашборд (если ещё не запущен) — используется Bash tool с `run_in_background=true`:
+
+```bash
+.venv/bin/pip install streamlit --quiet
+.venv/bin/python -m streamlit run dashboard.py
+```
+
 **HUMAN CHECKPOINT #3b — РЕАЛЬНАЯ ПРАВКА МЕТОК:**
 ```
 ## Авторазметка завершена
@@ -200,11 +207,14 @@ mkdir -p data/labeled
 - Средняя уверенность: <X>%
 - На проверку: <K> примеров → review_queue.csv
 
-❗ ДЕЙСТВИЕ ТРЕБУЕТСЯ:
-1. Открой файл review_queue.csv
-2. Проверь колонку 'label' — исправь ошибки в 'corrected_label'
-3. Сохрани файл
-4. Напиши "готово"
+✓ Дашборд запущен → http://localhost:8501
+
+❗ ДЕЙСТВИЕ ТРЕБУЕТСЯ (выбери любой способ):
+  А) Дашборд → страница ✏️ HITL Разметка — кликай прямо в браузере
+  Б) Терминал → python review_terminal.py (альтернатива без браузера)
+  В) Вручную → открой review_queue.csv, заполни corrected_label, сохрани
+
+Когда закончишь — напиши "готово"
 ```
 
 **ЖДАТЬ "готово" от пользователя.**
