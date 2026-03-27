@@ -324,6 +324,27 @@ mkdir -p ~/.claude/skills/ml-pipeline/scripts 2>/dev/null || true
 
 ---
 
+### Этап 6: Запуск дашборда
+
+После завершения всех этапов — установить streamlit (если нет) и поднять дашборд:
+
+```bash
+# Установить streamlit в venv если ещё нет
+.venv/bin/pip install streamlit --quiet
+
+# Запустить дашборд в фоне (откроется на http://localhost:8501)
+.venv/bin/python -m streamlit run dashboard.py &
+```
+
+Использовать Bash tool с `run_in_background=true`. После запуска сообщить:
+
+```
+✓ Дашборд запущен → http://localhost:8501
+  Страницы: 📊 Обзор | ✏️ HITL | 📈 Метрики | 💡 Выводы
+```
+
+---
+
 ### Финальная сводка
 
 После завершения всех этапов показать:
@@ -375,3 +396,4 @@ mkdir -p ~/.claude/skills/ml-pipeline/scripts 2>/dev/null || true
 5. При ошибке — показать проблему и предложить решение, не прерывать пайплайн
 6. Все файлы в ТЕКУЩЕЙ рабочей директории
 7. НЕ использовать `source activate` — только `.venv/bin/python`
+8. Этап 6 (дашборд) — запускать с `run_in_background=true`, не блокировать ответ
